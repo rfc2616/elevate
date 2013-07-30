@@ -20,8 +20,7 @@ module Elevate
         weak = WeakRef.new(self)
         setCompletionBlock(->{
           if weak
-            weak.performSelectorOnMainThread(:finalize, withObject: nil, waitUntilDone: true)
-            weak.setCompletionBlock(nil)
+            weak.performSelectorOnMainThread(:finalize, withObject: weak, waitUntilDone: false)
           end
         })
       end
@@ -45,7 +44,7 @@ module Elevate
     # @return [void]
     #
     # @api private
-    def finalize
+    def finalize()
       if @finish_callback
         @finish_callback.call(@result, @exception) unless isCancelled
       end
@@ -60,6 +59,8 @@ module Elevate
       @timeout_callback = nil
       @update_callback = nil
       @finish_callback = nil
+
+      setCompletionBlock(nil)
     end
 
     # Returns information about this task.
